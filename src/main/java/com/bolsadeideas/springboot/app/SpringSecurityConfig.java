@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
@@ -37,7 +38,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and().formLogin().successHandler(this.successHandler).loginPage("/login").permitAll()
 				.and().logout().permitAll()
 				.and().exceptionHandling()
-				.accessDeniedPage("/error_403");
+				.accessDeniedPage("/error_403")
+				.and()
+				.csrf().disable()//Deshabilitamos la protección csrf por que no usaremos la protección del token csrf sino el JWT. Importante que no hayan explícitamente inputs con el csrf
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//Stateless (sin estado), con esto deshabilitamos el uso de sesiones ya que usaremos el JWT
 	}
 
 }

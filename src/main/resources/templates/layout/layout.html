@@ -49,7 +49,6 @@
 				          <ul class="dropdown-menu">
 				            <li>
 				            	<form id="logoutForm" th:action="@{/logout}" method="POST">
-				            		<!-- Spring Security, en automático agregará un csrf token en todos los formularios que creemos-->
 				            		<button type="submit" onclick="document.getElementById('logoutForm').submit();" class="dropdown-item">Sign Out</button>
 				            	</form>
 				            </li>
