@@ -77,17 +77,3 @@ public class Usuario implements Serializable {
 	}
 
 }
-
-/**
- * DIFFERENCE: Cascading Remove y Orphan Removal
- * 
- * The difference between the two settings is in the response to disconnecting a
- * relationship. For example, such as when setting the address field to null or
- * to another Address object.
- * 
- * If orphanRemoval=true is specified the disconnected Address instance is
- * automatically removed. This is useful for cleaning up dependent objects (e.g.
- * Address) that should not exist without a reference from an owner object (e.g.
- * Employee). If only cascade=CascadeType.REMOVE is specified no automatic
- * action is taken since disconnecting a relationship is not a remove operation.
- */

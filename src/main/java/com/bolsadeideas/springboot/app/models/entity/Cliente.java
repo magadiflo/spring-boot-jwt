@@ -45,8 +45,6 @@ public class Cliente implements Serializable {
 	@Email
 	private String email;
 
-	// @Temporal(TemporalType.DATE), Indica el formato en que será guardado la fecha
-	// de java en la tabla de la BD. En nuestro caso solo guardará fecha
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "create_at")
 	@Temporal(TemporalType.DATE)
@@ -56,8 +54,7 @@ public class Cliente implements Serializable {
 
 	private String foto;
 
-	//orphanRemoval = true: Permite eliminar registros huérfanos que no están asociados a ningún cliente
-	@JsonManagedReference //Sí queremos que serializar las facturas
+	@JsonManagedReference
 	@OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Factura> facturas;
 

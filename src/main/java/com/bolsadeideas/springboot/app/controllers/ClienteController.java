@@ -62,8 +62,7 @@ public class ClienteController {
 	@Autowired
 	private MessageSource messageSource;
 
-	// .+, permite que Spring no trunque o borre la extensión del archivo
-	@Secured({"ROLE_USER"}) //Un arreglo que adminte varios roles, aquí solo hay uno
+	@Secured({"ROLE_USER"})
 	@GetMapping(value = "/uploads/{filename:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String filename) {
 		Resource recurso = null;
@@ -80,7 +79,6 @@ public class ClienteController {
 	@PreAuthorize("hasRole('ROLE_USER')")
 	@GetMapping(value = "/ver/{id}")
 	public String ver(@PathVariable(value = "id") Long id, Map<String, Object> model, RedirectAttributes flash) {
-		//Cliente cliente = this.clienteService.findOne(id);
 		Cliente cliente = this.clienteService.fetchByIdWithFacturas(id);
 		if (cliente == null) {
 			flash.addFlashAttribute("error", "El cliente no existe en la base de datos");
@@ -91,7 +89,6 @@ public class ClienteController {
 		return "ver";
 	}
 	
-	//Método REST, devuelve un objeto JSON
 	@GetMapping(value = "/listar-rest")
 	public @ResponseBody List<Cliente> listarRest() {
 		return this.clienteService.findAll();
@@ -111,16 +108,12 @@ public class ClienteController {
 			this.logger.info("Utilizando forma estática SecurityContextHolder.getContext().getAuthentication(): Usuario authenticado, tu username es: ".concat(auth.getName()));
 		}
 		
-		//3 Formas de verificar el role
-		
-		//1° Forma, creando manualmente el método y verificando el role
 		if(this.hasRole("ROLE_ADMIN")) {
 			this.logger.info("1° FORMA: Hola ".concat(auth.getName()).concat(" tienes acceso!"));
 		} else {
 			this.logger.info("1° FORMA: Hola ".concat(auth.getName()).concat(" no tienes acceso!"));
 		}
 		
-		//2° Forma, con el SecurityContextHolderAwareRequestWrapper
 		SecurityContextHolderAwareRequestWrapper securityContext = new SecurityContextHolderAwareRequestWrapper(request, "");
 		if(securityContext.isUserInRole("ROLE_ADMIN")) {
 			this.logger.info("2° FORMA: Forma usando SecurityContextHolderAwareRequestWrapper: Hola ".concat(auth.getName()).concat(" tienes acceso!"));
@@ -128,14 +121,13 @@ public class ClienteController {
 			this.logger.info("2° FORMA: Forma usando SecurityContextHolderAwareRequestWrapper: Hola ".concat(auth.getName()).concat(" no tienes acceso!"));
 		}
 		
-		//3° Forma, con el HttpServletRequest
 		if(request.isUserInRole("ROLE_ADMIN")) {
 			this.logger.info("3° FORMA: Forma usando HttpServletRequest: Hola ".concat(auth.getName()).concat(" tienes acceso!"));
 		} else {
 			this.logger.info("3° FORMA: Forma usando HttpServletRequest: Hola ".concat(auth.getName()).concat(" no tienes acceso!"));
 		}
 		
-		Pageable pageRequest = PageRequest.of(page, 5); // 5 registros por página
+		Pageable pageRequest = PageRequest.of(page, 5);
 		Page<Cliente> clientesPage = this.clienteService.findAll(pageRequest);
 
 		PageRender<Cliente> pageRender = new PageRender<>("/listar", clientesPage);
@@ -147,7 +139,7 @@ public class ClienteController {
 	}
 
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/form") // Por defecto GET
+	@RequestMapping(value = "/form")
 	public String crear(Map<String, Object> model) {
 		Cliente cliente = new Cliente();
 		model.put("titulo", "Formulario de cliente");
@@ -179,10 +171,6 @@ public class ClienteController {
 	public String guardar(@Valid Cliente cliente, BindingResult result, Model model,
 			@RequestParam("file") MultipartFile foto, RedirectAttributes flash, SessionStatus status) {
 		if (result.hasErrors()) {
-			// En automático el objeto cliente pasará al formulario, siempre y cuando
-			// el nombre cliente sea igual al atributo que se le pasa a la vista
-			// Caso contrario, si el nombre que se le pasa a la vista es distinto
-			// se usaría el @ModelAttribute("nombre_que_se_le_pasa_a_la_vista")
 			model.addAttribute("titulo", "Formulario de cliente - Corregir");
 			return "form";
 		}
@@ -202,13 +190,12 @@ public class ClienteController {
 
 			flash.addFlashAttribute("info", "Has subido correctamente '" + nuevoNombreArchivo + "'");
 
-			// Asignando foto al cliente para guardar en la BD
 			cliente.setFoto(nuevoNombreArchivo);
 		}
 
 		String msg = cliente.getId() != null ? "Cliente actualizado con éxito" : "Cliente creado con éxito";
 		this.clienteService.save(cliente);
-		status.setComplete(); // Elimina el obj. cliente de la sesión (se declarado al inicio de la clase)
+		status.setComplete();
 
 		flash.addFlashAttribute("success", msg);
 		return "redirect:/listar";
@@ -244,20 +231,8 @@ public class ClienteController {
 			return false;
 		}
 		
-		//? extends GrantedAuthority: Singifica "Cualquier tipo de objeto que herede de GrantedAuthority"
 		Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
 		
-		/*** PRIMERA FORMA
-		for(GrantedAuthority authority: authorities) {
-			if(role.equals(authority.getAuthority())) {
-				this.logger.info("Hola usuario".concat(auth.getName()).concat(" tu role es: ").concat(authority.getAuthority()));
-				return true;	
-			}
-		}
-		return false;
-		*/
-		
-		//*** SEGUNDA FORMA
 		return authorities.contains(new SimpleGrantedAuthority(role));
 	}
 

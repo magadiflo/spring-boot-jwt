@@ -26,9 +26,6 @@ public class MvcConfig implements WebMvcConfigurer {
 		return new BCryptPasswordEncoder();
 	}
 
-	// Configuración de nuestro sistema multilenguaje y el Locale: 2 @Bean y un
-	// método para registrar el interceptor LocaleChangeInterceptor
-
 	@Bean
 	public LocaleResolver localeResolver() {
 		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
@@ -39,7 +36,7 @@ public class MvcConfig implements WebMvcConfigurer {
 	@Bean
 	public LocaleChangeInterceptor localeChangeInterceptor() {
 		LocaleChangeInterceptor localeInterceptor = new LocaleChangeInterceptor();
-		localeInterceptor.setParamName("lang");// Será agregado en el nav del layout.html
+		localeInterceptor.setParamName("lang");
 		return localeInterceptor;
 	}
 
@@ -48,7 +45,6 @@ public class MvcConfig implements WebMvcConfigurer {
 		registry.addInterceptor(this.localeChangeInterceptor());
 	}
 
-	// Permitirá convertir el Objeto Entity en un documento XML
 	@Bean
 	public Jaxb2Marshaller jaxb2Marshaller() {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();

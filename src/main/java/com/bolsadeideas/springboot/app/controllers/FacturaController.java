@@ -28,7 +28,7 @@ import com.bolsadeideas.springboot.app.models.entity.ItemFactura;
 import com.bolsadeideas.springboot.app.models.entity.Producto;
 import com.bolsadeideas.springboot.app.models.services.IClienteService;
 
-@Secured("ROLE_ADMIN") //Con esto aplicará a todos los métodos handler (rutas)
+@Secured("ROLE_ADMIN")
 @Controller
 @RequestMapping("/factura")
 @SessionAttributes("factura")
@@ -57,11 +57,6 @@ public class FacturaController {
 		return "factura/form";
 	}
 
-	/**
-	 * @ResponseBody, suprime el cargar una vista de thymeleaf y en ves de eso, el
-	 * resultado lo estará retornando convertido en JSON y eso lo va a registrar
-	 * dentro del Body de la respuesta
-	 */
 	@GetMapping(value = "/cargar-productos/{term}", produces = { "application/json" })
 	public @ResponseBody List<Producto> cargarProductos(@PathVariable String term) {
 		return this.clienteService.findByNombre(term);
@@ -102,7 +97,6 @@ public class FacturaController {
 		
 		this.clienteService.saveFactura(factura);
 		
-		//Finalizamos el @SessionAttributes("factura")
 		status.setComplete();
 		
 		flash.addFlashAttribute("success", "Factura creada con éxito!");
@@ -112,10 +106,7 @@ public class FacturaController {
 	
 	@GetMapping("/ver/{id}")
 	public String ver(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
-		
-		//Con esto se realiza una única consulta para que traiga los datos de 
-		//toda la relación: cliente, factura, itemFactura y producto.
-		//Con esto ya no hay carga perezosa (lazy)
+
 		Factura factura = this.clienteService.fetchFacturaByIdWithClienteWithItemFacturaWithProducto(id);
 		
 		if(factura == null) {
