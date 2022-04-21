@@ -20,6 +20,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.bolsadeideas.springboot.app.models.entity.Usuario;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -41,15 +44,29 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 		String username = obtainUsername(request);
 		String password = obtainPassword(request);
-		username = (username != null) ? username.trim() : "";
-		password = (password != null) ? password : "";
 
-		if (username != null && password != null) {
+		if (username != null && password != null) { //Cuando se envía desde el Body/form-data
 			this.logger.info("Username desde request parameter (form-data): " + username);
 			this.logger.info("Password desde request parameter (form-data): " + password);
+		} else { //Para cuando se envía por Body/raw
+			Usuario user = null;
+			try {
+				user = new ObjectMapper().readValue(request.getInputStream(), Usuario.class);
+				username = user.getUsername();
+				password = user.getPassword();
+				
+				logger.info("Username desde request getInputStream (raw): " + username);
+				logger.info("Password desde request getInputStream (raw): " + password);
+			} catch (StreamReadException e) {
+				e.printStackTrace();
+			} catch (DatabindException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username.trim(), password);
 
 		return this.authenticationManager.authenticate(authToken);
 	}
