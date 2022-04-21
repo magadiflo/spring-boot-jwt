@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.bolsadeideas.springboot.app.auth.filter.JWTAuthenticationFilter;
+import com.bolsadeideas.springboot.app.auth.filter.JWTAuthorizationFilter;
 //import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
 import com.bolsadeideas.springboot.app.models.services.JpaUserDetailsService;
 
@@ -44,6 +45,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				*/
 				.and()
 				.addFilter(new JWTAuthenticationFilter(authenticationManager()))
+				.addFilter(new JWTAuthorizationFilter(authenticationManager()))
 				.csrf().disable()//Deshabilitamos la protección csrf por que no usaremos la protección del token csrf sino el JWT. Importante que no hayan explícitamente inputs con el csrf
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//Stateless (sin estado), con esto deshabilitamos el uso de sesiones ya que usaremos el JWT
 	}
