@@ -9,15 +9,15 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
+//import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
 import com.bolsadeideas.springboot.app.models.services.JpaUserDetailsService;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @Configuration
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Autowired
-	private LoginSuccessHandler successHandler;
+	//@Autowired
+	//private LoginSuccessHandler successHandler;
 
 	@Autowired
 	private JpaUserDetailsService userDetailService;
@@ -33,12 +33,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
-				.antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar**", "/locale", "/api/clientes/**")
-				.permitAll().anyRequest().authenticated()
+				.antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar**", "/locale").permitAll()
+				.anyRequest().authenticated()
+				/*
 				.and().formLogin().successHandler(this.successHandler).loginPage("/login").permitAll()
 				.and().logout().permitAll()
 				.and().exceptionHandling()
 				.accessDeniedPage("/error_403")
+				*/
 				.and()
 				.csrf().disable()//Deshabilitamos la protección csrf por que no usaremos la protección del token csrf sino el JWT. Importante que no hayan explícitamente inputs con el csrf
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//Stateless (sin estado), con esto deshabilitamos el uso de sesiones ya que usaremos el JWT
