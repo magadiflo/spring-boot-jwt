@@ -1,8 +1,6 @@
 package com.bolsadeideas.springboot.app.auth.filter;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,26 +13,24 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.bolsadeideas.springboot.app.auth.service.IJwtService;
 import com.bolsadeideas.springboot.app.models.entity.Usuario;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 	private AuthenticationManager authenticationManager;
+	private IJwtService jwtService;
 
-	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public JWTAuthenticationFilter(AuthenticationManager authenticationManager, IJwtService jwtService) {
 		this.authenticationManager = authenticationManager;
+		this.jwtService = jwtService;
 		this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login", "POST"));
 	}
 
@@ -75,19 +71,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		
-		Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
-		Claims claims = Jwts.claims();
-		claims.put("authorities", new ObjectMapper().writeValueAsString(roles)); //new ObjectMapper().writeValueAsString(roles), convertimos el objeto roles a un formato JSON
-		
-		String username = ((User) authResult.getPrincipal()).getUsername();
-		String token = Jwts.builder()
-				.setClaims(claims)
-				.setSubject(username)
-				.signWith(SignatureAlgorithm.HS512, "Alguna.Clave.Secreta.12345".getBytes())
-				.setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + 3600000L))
-				.compact();
-
+		String token = this.jwtService.create(authResult);
+		String username = ((User)authResult.getPrincipal()).getUsername();
 		/**
 		 * Importante que el nombre del paráemtro sea Authorization y el 
 		 * valor como estándar debe iniciar con el prefijo Bearer 
